@@ -1,0 +1,25 @@
+#!/bin/bash
+msg="etckeeper uncommited / untracked files check"
+outfile="/root/cert-uncommited.txt"
+logger -t etckeeper-uncommited $msg
+echo $(date +"%H:%M:%S %d-%m-%y") $msg > $outfile
+echo $(etckeeper vcs status) >> $outfile
+
+keep=$(etckeeper vcs status | grep -i "Changes not staged")
+if [ $? -eq 0 ]; then
+	#echo "We have to commit"
+	action=" - need to commit"
+else
+	#echo "Nothing to do"
+	action="- no action needed"
+fi
+
+keep=$(etckeeper vcs status | grep -i "Untracked files")
+if [ $? -eq 0 ]; then
+ action=" - untracked files"
+else
+ action=" - no untracked files"
+fi
+
+mail -s "etckeeper $action" beheer@nllgg.nl < $outfile
+
